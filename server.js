@@ -5,6 +5,7 @@ const mongoose = require(`mongoose`);
 const cookieParser = require(`cookie-parser`);
 
 const authRouter = require(`./routes/auth.routes`);
+const driverRouter = require(`./routes/driver.routes`);
 
 // APP CONFIG
 const app = express();
@@ -21,6 +22,7 @@ mongoose.connect(database).then(() => console.log('Connected to database'));
 
 // API ENDPOINTS
 app.use(`/api/v1/auth`, authRouter);
+app.use(`/api/v1/drivers`, driverRouter);
 
 // LISTENER
 app.listen(port, () => {
