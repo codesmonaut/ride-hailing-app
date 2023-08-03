@@ -1,3 +1,4 @@
+const fs = require(`fs`);
 const path = require(`path`);
 const express = require(`express`);
 const multer = require(`multer`);
@@ -35,8 +36,8 @@ const router = express.Router();
 // ROUTE PROTECTION MIDDLEWARE
 router.use(protect);
 
-// Signing for driver
-router.patch(`/signingForDriver`, upload.fields(requiredDoc), async (req, res) => {
+// Become driver
+router.patch(`/becomeDriver`, upload.fields(requiredDoc), async (req, res) => {
 
     try {
 
@@ -65,6 +66,64 @@ router.patch(`/signingForDriver`, upload.fields(requiredDoc), async (req, res) =
             }
         })
         
+    } catch (err) {
+        handleError(res, err);
+    }
+})
+
+// Stop being driver
+router.patch(`/stopBeingDriver`, async (req, res) => {
+
+    try {
+        
+        const driver = await User.findById(req.currentUserId);
+
+        if (!driver.isDriver) {
+            const message = 'You need to be a driver to perform this action';
+            return handleError(res, new ErrorResponse(401, message));
+        }
+
+        fs.unlink(`./uploads/${driver.profilePhoto}`, err => {
+            
+            if (err) {
+                console.log(err.message);
+            }
+        })
+
+        fs.unlink(`./uploads/${driver.driversLicense}`, err => {
+
+            if (err) {
+                console.log(err.message);
+            }
+        })
+
+        fs.unlink(`./uploads/${driver.vehicleInsAndReg}`, err => {
+
+            if (err) {
+                console.log(err.message);
+            }
+        })
+
+        const filteredObj = {
+            isDriver: false
+        }
+
+        const user = await User.findByIdAndUpdate(req.currentUserId, filteredObj, {
+            new: true,
+            runValidators: true
+        })
+
+        user.stopBeingDriver();
+
+        user.password = undefined;
+
+        res.status(200).json({
+            status: 200,
+            data: {
+                user: user
+            }
+        })
+
     } catch (err) {
         handleError(res, err);
     }

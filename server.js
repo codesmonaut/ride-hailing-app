@@ -17,6 +17,9 @@ const database = process.env.DATABASE;
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 
+// STATIC FILES
+app.use(`/uploads`, express.static(`${__dirname}/uploads`));
+
 // DB CONFIG
 mongoose.connect(database).then(() => console.log('Connected to database'));
 
