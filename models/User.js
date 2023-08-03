@@ -107,14 +107,6 @@ userSchema.statics.comparePasswords = async function (candidatePassword, userPas
     return await bcrypt.compare(candidatePassword, userPassword);
 }
 
-userSchema.methods.stopBeingDriver = function () {
-    this.profilePhoto = undefined;
-    this.driversLicense = undefined;
-    this.vehicleInsAndReg = undefined;
-    this.driversLatitude = undefined;
-    this.driversLongitude = undefined;
-}
-
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

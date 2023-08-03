@@ -105,15 +105,18 @@ router.patch(`/stopBeingDriver`, async (req, res) => {
         })
 
         const filteredObj = {
-            isDriver: false
+            isDriver: false,
+            profilePhoto: 'empty',
+            driversLicense: 'empty',
+            vehicleInsAndReg: 'empty',
+            driversLatitude: null,
+            driversLongitude: null
         }
 
         const user = await User.findByIdAndUpdate(req.currentUserId, filteredObj, {
             new: true,
             runValidators: true
         })
-
-        user.stopBeingDriver();
 
         user.password = undefined;
 
