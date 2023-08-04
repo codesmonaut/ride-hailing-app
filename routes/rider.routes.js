@@ -52,4 +52,52 @@ router.post(`/bookARide`, async (req, res) => {
     }
 })
 
+// Confirm ride
+router.patch(`/confirmRide/:id`, async (req, res) => {
+
+    try {
+
+        const rider = await User.findById(req.currentUserId);
+        const driver = await User.findById(req.params.id);
+
+        if (driver.ridersRequestAccepted) {
+            const message = 'This driver already accepts ride with rider.';
+            return handleError(res, new ErrorResponse(400, message));
+        }
+
+        const ridersPickUpLatitude = req.cookies.ridersPickUpLatitude;
+        const ridersPickUpLongitude = req.cookies.ridersPickUpLongitude;
+        const ridersDestinationLatitude = req.cookies.ridersDestinationLatitude;
+        const ridersDestinationLongitude = req.cookies.ridersDestinationLongitude;
+
+        const filteredObj = {
+            ridersRequest: {
+                _id: rider._id,
+                username: rider.username,
+                ridersPickUpLatitude: ridersPickUpLatitude,
+                ridersPickUpLongitude: ridersPickUpLongitude,
+                ridersDestinationLatitude: ridersDestinationLatitude,
+                ridersDestinationLongitude: ridersDestinationLongitude
+            }
+        }
+
+        const confirmedDriver = await User.findByIdAndUpdate(req.params.id, filteredObj, {
+            new: true,
+            runValidators: true
+        })
+
+        confirmedDriver.password = undefined;
+
+        res.status(200).json({
+            status: 200,
+            data: {
+                driver: confirmedDriver
+            }
+        })
+        
+    } catch (err) {
+        handleError(res, err);
+    }
+})
+
 module.exports = router;

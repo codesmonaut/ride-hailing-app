@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
         minlength: [8, 'Password must have more than 8 characters.'],
         maxlength: [50, 'Password must have less than 50 characters.']
     },
+    rideRequestAccepted: {
+        type: Boolean,
+        default: false
+    },
     isDriver: {
         type: Boolean,
         default: false
@@ -80,6 +84,32 @@ const userSchema = new mongoose.Schema({
     },
     driversLongitude: {
         type: Number,
+        required: function () {
+
+            if (this.isDriver) {
+                return true;
+            }
+
+            if (!this.isDriver) {
+                return false;
+            }
+        }
+    },
+    ridersRequest: {
+        type: Object,
+        required: function () {
+
+            if (this.isDriver) {
+                return true;
+            }
+
+            if (!this.isDriver) {
+                return false;
+            }
+        }
+    },
+    ridersRequestAccepted: {
+        type: Boolean,
         required: function () {
 
             if (this.isDriver) {

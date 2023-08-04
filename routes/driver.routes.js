@@ -49,7 +49,9 @@ router.patch(`/becomeDriver`, upload.fields(requiredDoc), async (req, res) => {
             driversLicense: req.files['driversLicense'][0].filename,
             vehicleInsAndReg: req.files['vehicleInsAndReg'][0].filename,
             driversLatitude: req.body.driversLatitude,
-            driversLongitude: req.body.driversLongitude
+            driversLongitude: req.body.driversLongitude,
+            ridersRequest: null,
+            ridersRequestAccepted: false
         }
 
         const driver = await User.findByIdAndUpdate(req.currentUserId, filteredObj, {
@@ -110,7 +112,9 @@ router.patch(`/stopBeingDriver`, async (req, res) => {
             driversLicense: 'empty',
             vehicleInsAndReg: 'empty',
             driversLatitude: null,
-            driversLongitude: null
+            driversLongitude: null,
+            ridersRequest: null,
+            ridersRequestAccepted: false
         }
 
         const user = await User.findByIdAndUpdate(req.currentUserId, filteredObj, {
@@ -194,6 +198,87 @@ router.patch(`/continueDriving`, async (req, res) => {
             status: 200,
             data: {
                 driver: driverWhoContinuesDriving
+            }
+        })
+        
+    } catch (err) {
+        handleError(res, err);
+    }
+})
+
+// Accept riders request
+router.patch(`/acceptRidersRequest`, async (req, res) => {
+
+    try {
+
+        const filteredObjForDriver = {
+            ridersRequestAccepted: true
+        }
+
+        const driver = await User.findByIdAndUpdate(req.currentUserId, filteredObjForDriver, {
+            new: true,
+            runValidators: true
+        })
+
+        const filteredObjForRider = {
+            rideRequestAccepted: true
+        }
+
+        const rider = await User.findByIdAndUpdate(driver.ridersRequest._id, filteredObjForRider, {
+            new: true,
+            runValidators: true
+        })
+
+        driver.password = undefined;
+        rider.password = undefined;
+
+        res.status(200).json({
+            status: 200,
+            data: {
+                driver: driver,
+                rider: rider
+            }
+        })
+        
+    } catch (err) {
+        handleError(res, err);
+    }
+})
+
+// Finish ride
+router.patch(`/finishRide`, async (req, res) => {
+
+    try {
+
+        const driver = await User.findById(req.currentUserId);
+
+        const filteredObjForRider = {
+            rideRequestAccepted: false
+        }
+
+        const rider = await User.findByIdAndUpdate(driver.ridersRequest._id, filteredObjForRider, {
+            new: true,
+            runValidators: true
+        })
+
+        const filteredObjForDriver = {
+            ridersRequest: {},
+            ridersRequestAccepted: false
+        }
+
+        const driverWhoFinishedRide = await User.findByIdAndUpdate(req.currentUserId, filteredObjForDriver, {
+            new: true,
+            runValidators: true
+        })
+
+        rider.password = undefined;
+        driverWhoFinishedRide.password = undefined;
+
+        res.status(200).json({
+            status: 200,
+            data: {
+                driver: driverWhoFinishedRide,
+                rider: rider
             }
         })
         
