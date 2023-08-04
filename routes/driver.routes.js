@@ -132,4 +132,74 @@ router.patch(`/stopBeingDriver`, async (req, res) => {
     }
 })
 
+// Stop driving
+router.patch(`/stopDriving`, async (req, res) => {
+
+    try {
+
+        const driver = await User.findById(req.currentUserId);
+
+        if (!driver.isDriver) {
+            const message = 'Only driver can stop driving';
+            return handleError(res, new ErrorResponse(400, message));
+        }
+
+        const filteredObj = {
+            driversLatitude: null,
+            driversLongitude: null
+        }
+
+        const driverWhoStopsDrivning = await User.findByIdAndUpdate(req.currentUserId, filteredObj, {
+            new: true,
+            runValidators: true
+        })
+
+        driverWhoStopsDrivning.password = undefined;
+
+        res.status(200).json({
+            status: 200,
+            driver: driverWhoStopsDrivning
+        })
+        
+    } catch (err) {
+        handleError(res, err);
+    }
+})
+
+// Continue driving
+router.patch(`/continueDriving`, async (req, res) => {
+
+    try {
+
+        const driver = await User.findById(req.currentUserId);
+
+        if (!driver.isDriver) {
+            const message = 'Only driver can continue driving.';
+            return handleError(res, new ErrorResponse(400, message));
+        }
+
+        const filteredObj = {
+            driversLatitude: req.body.driversLatitude,
+            driversLongitude: req.body.driversLongitude
+        }
+
+        const driverWhoContinuesDriving = await User.findByIdAndUpdate(req.currentUserId, filteredObj, {
+            new: true,
+            runValidators: true
+        })
+
+        driverWhoContinuesDriving.password = undefined;
+
+        res.status(200).json({
+            status: 200,
+            data: {
+                driver: driverWhoContinuesDriving
+            }
+        })
+        
+    } catch (err) {
+        handleError(res, err);
+    }
+})
+
 module.exports = router;
