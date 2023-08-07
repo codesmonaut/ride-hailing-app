@@ -287,4 +287,21 @@ router.patch(`/finishRide`, async (req, res) => {
     }
 })
 
+// Play driving tutorial
+router.get(`/drivingTutorial`, async (req, res) => {
+
+    try {
+
+        const videoPath = `${__dirname}/../video/driving_tutorial.mp4`;
+
+        res.set('content-type', 'video/mp4');
+        res.set('accept-ranges', 'bytes');
+
+        fs.createReadStream(videoPath).pipe(res);
+        
+    } catch (err) {
+        handleError(res, err);
+    }
+})
+
 module.exports = router;
